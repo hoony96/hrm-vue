@@ -7,6 +7,7 @@ import user from './views/nav1/user.vue'
 import Page5 from './views/nav2/Page5.vue'
 import echarts from './views/charts/echarts.vue'
 import CourseType from './views/course/CourseType'
+import treeSelect from './components/treeSelect'
 
 let routes = [
     {
@@ -50,7 +51,7 @@ let routes = [
         iconCls: 'fa fa-id-card-o',
         children: [
             { path: '/courseType', component: CourseType, name: '课程类型' },
-            { path: '/page5', component: Page5, name: '课程细节' }
+            { path: '/page5', component: treeSelect, name: '课程细节' }
         ]
     },
     {
