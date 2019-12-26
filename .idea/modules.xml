@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/hrm-admin/hrm-admin.iml" filepath="$PROJECT_DIR$/hrm-admin/hrm-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hrm-vue.iml" filepath="$PROJECT_DIR$/hrm-vue.iml" />
+    </modules>
+  </component>
+</project>
