@@ -8,6 +8,9 @@ import Page5 from './views/nav2/Page5.vue'
 import echarts from './views/charts/echarts.vue'
 import CourseType from './views/course/CourseType'
 import treeSelect from './components/treeSelect'
+import TenantRegister from './views/TenantRegister'
+import Course from './views/course/Course'
+
 
 let routes = [
     {
@@ -20,6 +23,12 @@ let routes = [
         path: '/404',
         component: NotFound,
         name: '',
+        hidden: true
+    },
+    {
+        path: '/register',
+        component: TenantRegister,
+        name: '注册界面',
         hidden: true
     },
     //{ path: '/main', component: Main },
@@ -41,7 +50,7 @@ let routes = [
         children: [
             { path: '/systemdictionary', component: Table, name: '字典管理' },
             { path: '/systemdictionaryItem', component: Form, name: '角色管理' },
-            { path: '/employee', component: user, name: '员工管理' },
+            { path: '/employee', component: user, name: '员工管理' }
         ]
     },
     {
@@ -51,7 +60,7 @@ let routes = [
         iconCls: 'fa fa-id-card-o',
         children: [
             { path: '/courseType', component: CourseType, name: '课程类型' },
-            { path: '/page5', component: treeSelect, name: '课程细节' }
+            { path: '/course', component: Course, name: '课程细节' }
         ]
     },
     {

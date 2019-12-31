@@ -35,13 +35,13 @@
                 </el-form-item>
                 <el-form-item label="父级目录">
                     <select-tree
-                            :props="props"
-                            :options="courseTypes"
-                            :value="valueId"
-                            :clearable="true"
-                            :accordion="true"
-                            @getValue="getValue($event)"
-                    />
+                        :props="props"
+                        :options="courseTypes"
+                        :value="valueId"
+                        :clearable="true"
+                        :accordion="true"
+                        @getValue="getValue($event)"
+                />
                 </el-form-item>
                 <el-form-item label="logo">
                     <el-input v-model="addForm.logo" auto-complete="off"></el-input>
@@ -193,9 +193,7 @@
                                 type: 'success'
                             })
                         }
-                        this.addFormVisible = false;
                         this.getTreeData();
-                        this.addForm.resetFields();
                         this.valueId = '';
                     })
             },

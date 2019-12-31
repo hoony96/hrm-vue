@@ -36,7 +36,7 @@ router.beforeEach((to, from, next) => {
     sessionStorage.removeItem('user');
   }
   let user = JSON.parse(sessionStorage.getItem('user'));
-  if (!user && to.path != '/login') {
+  if (!user && to.path != '/login' && to.path != '/register') {
     next({ path: '/login' })
   } else {
     next()
@@ -55,4 +55,25 @@ new Vue({
   //components: { App }
   render: h => h(App)
 }).$mount('#app')
+
+
+// 使用百度MAp
+import BaiduMap from 'vue-baidu-map'
+
+Vue.use(BaiduMap, {
+    // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
+    ak: 'UPbP9D0Xxxuttvnf99E8SNiSNOQVHW0M'
+})
+
+
+// 使用富文本编辑器
+import VueQuillEditor from 'vue-quill-editor'
+
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(VueQuillEditor)
+
 
