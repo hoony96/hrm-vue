@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/hrm-admin/hrm-admin.iml" filepath="$PROJECT_DIR$/hrm-admin/hrm-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hrm-course/hrm-course.iml" filepath="$PROJECT_DIR$/hrm-course/hrm-course.iml" />
       <module fileurl="file://$PROJECT_DIR$/hrm-vue.iml" filepath="$PROJECT_DIR$/hrm-vue.iml" />
     </modules>
   </component>

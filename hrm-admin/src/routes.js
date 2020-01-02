@@ -10,6 +10,8 @@ import CourseType from './views/course/CourseType'
 import treeSelect from './components/treeSelect'
 import TenantRegister from './views/TenantRegister'
 import Course from './views/course/Course'
+import Page from './views/page/Page'
+import Site from './views/page/Site'
 
 
 let routes = [
@@ -61,6 +63,16 @@ let routes = [
         children: [
             { path: '/courseType', component: CourseType, name: '课程类型' },
             { path: '/course', component: Course, name: '课程细节' }
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '页面管理',
+        iconCls: 'fa fa-id-card-o',
+        children: [
+            { path: '/site', component: Site, name: '站点管理' },
+            { path: '/page', component: Page, name: '页面管理' }
         ]
     },
     {

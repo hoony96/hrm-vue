@@ -24,8 +24,12 @@
                     <el-button type="primary" @click="handleAdd">新增课程</el-button>
                     <el-button type="primary" @click="handleMarket">市场信息</el-button>
                     <el-button type="primary" @click="handlePic">图片信息</el-button>
-                    <el-button type="primary" @click="handleAdd">上架</el-button>
-                    <el-button type="primary" @click="handleAdd">下架</el-button>
+                    <el-form-item>
+                        <el-button type="primary" @click="online" :disabled="this.sels.length===0">上线</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="offline" :disabled="this.sels.length===0">下线</el-button>
+                    </el-form-item>
                 </el-form-item>
             </el-form>
         </el-col>
@@ -96,19 +100,22 @@
                 </el-form-item>
                 <el-form-item label="难度级别">
                     <el-radio-group v-model="addCourse.grade">
-                        <el-radio :label="1">初级</el-radio>
-                        <el-radio :label="2">中级</el-radio>
-                        <el-radio :label="3">高级</el-radio>
+                        <el-radio :label="1">黑铁</el-radio>
+                        <el-radio :label="2">青铜</el-radio>
+                        <el-radio :label="3">白银</el-radio>
+                        <el-radio :label="4">黄金</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
-                <el-form-item label="课程介绍">
+                <el-form-item label="课程简介">
+                    <el-input v-model="intro" auto-complete="off"></el-input>
+                </el-form-item>
+
+                <el-form-item label="课程详情">
                     <quill-editor v-model="content"
                                   ref="myQuillEditor"
                                   :options="editorOption"
-                                  @blur="onEditorBlur($event)"
-                                  @focus="onEditorFocus($event)"
-                                  @ready="onEditorReady($event)">
+                                  @blur="onEditorBlur($event)">
                     </quill-editor>
                 </el-form-item>
 
@@ -141,10 +148,23 @@
                 </el-form-item>
                 <el-form-item label="难度级别">
                     <el-radio-group v-model="editCourse.grade">
-                        <el-radio :label="1">初级</el-radio>
-                        <el-radio :label="2">中级</el-radio>
-                        <el-radio :label="3">高级</el-radio>
+                        <el-radio :label="1">黑铁</el-radio>
+                        <el-radio :label="2">青铜</el-radio>
+                        <el-radio :label="3">白银</el-radio>
+                        <el-radio :label="4">黄金</el-radio>
                     </el-radio-group>
+                </el-form-item>
+
+                <el-form-item label="课程简介">
+                    <el-input v-model="intro" auto-complete="off"></el-input>
+                </el-form-item>
+
+                <el-form-item label="课程详情">
+                    <quill-editor v-model="content"
+                                  ref="myQuillEditor"
+                                  :options="editorOption"
+                                  @blur="onEditorBlur($event)">
+                    </quill-editor>
                 </el-form-item>
 
             </el-form>
@@ -156,29 +176,12 @@
 
         <!--  维护市场信息 -->
         <el-dialog title="市场信息维护" :visible.sync="marketFormVisible" :close-on-click-modal="false">
-            <el-form :model="market" label-width="130px" :rules="marketRules" ref="market">
+            <el-form :model="market" label-width="130px" ref="market">
                 <el-form-item label="名称">
                     <el-input v-model="market.name" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="适用人群">
                     <el-input v-model="market.users" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="所属课程类型">
-                    <select-tree
-                            :props="props"
-                            :options="courseTypes"
-                            :value="valueId"
-                            :clearable="true"
-                            :accordion="true"
-                            @getValue="getValue($event)"
-                    />
-                </el-form-item>
-                <el-form-item label="难度级别">
-                    <el-radio-group v-model="editCourse.grade">
-                        <el-radio :label="1">初级</el-radio>
-                        <el-radio :label="2">中级</el-radio>
-                        <el-radio :label="3">高级</el-radio>
-                    </el-radio-group>
                 </el-form-item>
 
             </el-form>
@@ -200,6 +203,7 @@
         data(){
             return {
                 // 富文本框内容
+                intro:'',
                 content:'',
                 //  市场信息维护
                 marketFormVisible:false,
@@ -262,12 +266,6 @@
             }
         },
         methods:{
-            // 富文本框
-            onEditorBlur(qulli){
-                this.$http.post("/course/courseDetail/save",this.content)
-                    .then()
-            },
-
             // 下拉树
             // 获取下拉框节点的id
             getValue(value){
@@ -327,13 +325,14 @@
             // 处理新增课程
             handleAdd(){
                 this.addCourseVisible = true;
-                this.getTreeData();
             },
             handleAddSubmit(){
                 let param = {};
                 param = Object.assign({}, this.addCourse);
                 param.courseTypeId = this.valueId;
-                this.$http.post("/course/course/save",param)
+                param.description = this.content;
+                param.intro = this.intro;
+                this.$http.post("/course/course/insert",param)
                     .then(res=>{
                         let {success,message} = res.data;
                         if(success){
@@ -342,7 +341,8 @@
                                 message : message
                             })
                             this.addCourseVisible = false;
-                            this.addCourse.resetField();
+                            this.$refs.addCourse.resetFields()
+                            ;
                         }else{
                             this.$message({
                                 type : "error",
@@ -354,17 +354,23 @@
 
             // 处理 编辑课程
             handleEdit(index,row){
-                this.getTreeData();
                 this.editCourse = row;
                 this.valueId = row.courseTypeId;
-                debugger;
+                this.$http.get("/course/courseDetail/"+row.id)
+                    .then(res=>{
+                        this.content = res.data.description;
+                        this.intro = res.data.intro;
+                    })
                 this.editCourseVisible = true;
+
             },
             handleEditSubmit(){
                 let param = {};
                 param = Object.assign({}, this.editCourse);
                 param.courseTypeId = this.valueId;
-                this.$http.post("/course/course/save",param)
+                param.description = this.content;
+                param.intro = this.intro;
+                this.$http.post("/course/course/insert",param)
                     .then(res=>{
                         let {success,message} = res.data;
                         if(success){
@@ -413,7 +419,7 @@
                     ids += this.sels[i].id;
                     ids += ","
                 }
-                debugger;
+                // let ids = this.sels.map(e=>e.id);  直接转为 List ids
                 this.$confirm('确认删除该数据吗?', '提示', {
                     type: 'warning'
                 }).then(() => {
@@ -438,7 +444,7 @@
 
             // 处理修改市场 信息
             handleMarket(){
-
+                this.marketFormVisible = true;
             },
 
             // 处理 资源图片信息
@@ -449,9 +455,56 @@
                 this.pageNum = val;
                 this.getCourses();
             },
+
+            // 处理上线
+            online(){
+                let param = this.sels.map(e => e.id);//es6语法
+                this.$http.post("/course/course/online",param) //$.Post(.....)
+                    .then(result=>{
+                        let {success,message} = result.data;
+                        if (success){
+                            this.$message({
+                                message: '操作成功!',
+                                type: 'success'
+                            });
+                            //刷新数据
+                            this.getCourses();
+                        }else{
+                            this.$message({
+                                message: '操作失败!',
+                                type: 'error'
+                            });
+                        }
+
+                    });
+            },
+
+            // 处理下线
+            offline(){
+                let param = this.sels.map(e => e.id);//es6语法
+                this.$http.post("/course/course/offline",param) //$.Post(.....)
+                    .then(result=>{
+                        let {success,message} = result.data;
+                        if (success){
+                            this.$message({
+                                message: '操作成功!',
+                                type: 'success'
+                            });
+                            //刷新数据
+                            this.getCourses();
+                        }else{
+                            this.$message({
+                                message: '操作失败!',
+                                type: 'error'
+                            });
+                        }
+
+                    });
+            }
         },
         mounted(){
             this.getCourses();
+            this.getTreeData();
         }
     }
 </script>
