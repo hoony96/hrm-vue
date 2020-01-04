@@ -1,7 +1,7 @@
 <template id="courseType">
     <section>
         <el-row style="height: 100%;border: 1px solid #DCDFE6;margin-top: 10px">
-            <el-col :span="5" style="border-right: 1px solid #DCDFE6; min-height:620px;">
+            <el-col :span="5" style="border-right: 1px solid #DCDFE6; min-height:600px;">
                 <div class="tool-bar">
                     <span class="el-icon-info"> 单击右键,进行新增/修改/删除操作</span>
                     <!--<el-button type="primary" class="el-icon-plus" circle></el-button>
@@ -22,8 +22,36 @@
                     </ul>
                 </div>
             </el-col>
-            <el-col :span="19" style="margin-left: 10px;padding-top: 10px" >
-
+            <el-col :span="18" style="margin-left: 10px;padding-top: 10px" >
+                <el-table :data="courses" highlight-current-row style="width: 100%;">
+                    <el-table-column prop="name" label="名称" width="120" sortable>
+                    </el-table-column>
+                    <el-table-column prop="courseType.name" label="课程类型" width="100" sortable>
+                    </el-table-column>
+                    <el-table-column prop="tenantName" label="机构" width="100" sortable>
+                    </el-table-column>
+                    <el-table-column prop="userName" label="创建用户" width="120" sortable>
+                    </el-table-column>
+                    <el-table-column prop="startTime" label="上架时间" min-width="180" sortable :formatter="formatStartTime">
+                    </el-table-column>
+                    <el-table-column prop="endTime" label="下架时间" min-width="180" sortable :formatter="formatEndTime">
+                    </el-table-column>
+                    <el-table-column prop="status" label="课程状态" min-width="100" sortable>
+                        <template scope="scope">
+                    <span v-if="scope.row.status == 1" style="color: green;">
+                        上架
+                    </span>
+                            <span v-else style="color: red;">
+                        未上架
+                    </span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <!--工具条-->
+                <el-col :span="24" class="toolbar">
+                    <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="pageSize" :total="total" style="float:right;">
+                    </el-pagination>
+                </el-col>
             </el-col>
         </el-row>
 
@@ -104,6 +132,13 @@
         },
         data() {
             return {
+                // 右侧表格展示
+                courses:[],
+                pageNum:1,
+                pageSize:10,
+                total:0,
+
+
                 addLoading:false,
                 editFormVisible:false,
                 props:{
@@ -145,6 +180,52 @@
             }
         },
         methods:{
+            handleCurrentChange(val){
+                this.pageNum = val;
+                this.getCourses();
+            },
+            formatStartTime(row, column){
+                return this.formatTime(row.startTime);
+            },
+            formatEndTime(row, column){
+                return this.formatTime(row.endTime);
+            },
+            formatTime(time){
+                if (!time){
+                    return "";
+                }
+                let date = new Date(time);
+                let year = date.getFullYear();
+                let month = date.getMonth()+1;
+                let day = date.getDay();
+                let hours = date.getHours();
+                let minutes = date.getMinutes();
+                let seconds = date.getSeconds();
+                let timeStr = year+"-"+this.formatNum(month)+"-"+this.formatNum(day)+" "
+                    + this.formatNum(hours)+":"+this.formatNum(minutes)+":"+this.formatNum(seconds)
+                return timeStr
+            },
+            formatNum(num){
+                if (num<10){
+                    return "0"+num;
+                }
+                return num;
+            },
+
+            //获取课程
+            getCourses(){
+                let param = {};
+                param.page = this.pageNum;
+                param.rows = this.pageSize;
+                param.typeId = this.contentId;
+                this.$http.post("/course/course/page",param)
+                    .then(res=>{
+                        let {total,rows} = res.data;
+                        this.total = total;
+                        this.courses = rows;
+                    })
+            },
+
             // 处理删除
             handleDelete(){
                 this.$confirm('确认删除该数据吗?', '提示', {
@@ -236,6 +317,11 @@
             // 左键显示 课程细节
             handleNodeClick(data){
                 // data 是当前节点的数据
+                if(data.children.length == 0){
+                    this.contentId = data.id;
+                    this.getCourses();
+                }
+
             },
             // 右键菜单显示
             rightClick(e,data,node,comp){

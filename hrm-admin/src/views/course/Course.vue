@@ -22,8 +22,8 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="handleAdd">新增课程</el-button>
-                    <el-button type="primary" @click="handleMarket">市场信息</el-button>
-                    <el-button type="primary" @click="handlePic">图片信息</el-button>
+                    <!--<el-button type="primary" @click="handleMarket" :disabled="this.sels.length!=1">市场信息维护</el-button>-->
+                    <!--<el-button type="primary" @click="handlePic" :disabled="this.sels.length!=1">图片信息维护</el-button>-->
                     <el-form-item>
                         <el-button type="primary" @click="online" :disabled="this.sels.length===0">上线</el-button>
                     </el-form-item>
@@ -39,8 +39,6 @@
 
             <el-table-column type="selection" width="55">
             </el-table-column>
-            <el-table-column type="index" width="60">
-            </el-table-column>
             <el-table-column prop="name" label="名称" width="120" sortable>
             </el-table-column>
             <el-table-column prop="courseType.name" label="课程类型" width="100" sortable>
@@ -49,11 +47,11 @@
             </el-table-column>
             <el-table-column prop="userName" label="创建用户" width="120" sortable>
             </el-table-column>
-            <el-table-column prop="startTime" label="上架时间" min-width="180" sortable :formatter="formatStartTime">
+            <el-table-column prop="startTime" label="上架时间" min-width="130" sortable :formatter="formatStartTime">
             </el-table-column>
-            <el-table-column prop="endTime" label="下架时间" min-width="180" sortable :formatter="formatEndTime">
+            <el-table-column prop="endTime" label="下架时间" min-width="130" sortable :formatter="formatEndTime">
             </el-table-column>
-            <el-table-column prop="status" label="课程状态" min-width="180" sortable>
+            <el-table-column prop="status" label="课程状态" min-width="90" sortable>
                 <template scope="scope">
                     <span v-if="scope.row.status == 1" style="color: green;">
                         上架
@@ -63,10 +61,20 @@
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="150">
+            <el-table-column label="操作" width="200">
                 <template scope="scope">
-                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                    <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+                    <el-tooltip class="item" effect="light" content="编辑" placement="bottom">
+                        <el-button size="small" @click="handleEdit(scope.$index, scope.row)" icon="el-icon-edit" circle></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="light" content="删除" placement="bottom">
+                        <el-button size="small" @click="handleDel(scope.$index, scope.row)" icon="el-icon-delete" circle></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="light" content="市场信息维护" placement="bottom">
+                        <el-button size="small" @click="handleMarket(scope.$index, scope.row)" icon="fa fa-shopping-basket" circle></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="light" content="资源信息维护" placement="bottom">
+                        <el-button  size="small" @click="handlePic(scope.$index, scope.row)" icon="fa fa-object-group" circle></el-button>
+                    </el-tooltip>
                 </template>
             </el-table-column>
         </el-table>
@@ -177,17 +185,61 @@
         <!--  维护市场信息 -->
         <el-dialog title="市场信息维护" :visible.sync="marketFormVisible" :close-on-click-modal="false">
             <el-form :model="market" label-width="130px" ref="market">
-                <el-form-item label="名称">
-                    <el-input v-model="market.name" auto-complete="off"></el-input>
+                <el-form-item label="收费规则">
+                    <el-radio-group v-model="market.charge">
+                        <el-radio :label="5">付费</el-radio>
+                        <el-radio :label="6">免费</el-radio>
+                    </el-radio-group>
                 </el-form-item>
-                <el-form-item label="适用人群">
-                    <el-input v-model="market.users" auto-complete="off"></el-input>
+                <el-form-item label="有效性">
+                    <el-radio-group v-model="market.valid">
+                        <el-radio :label="9">有效</el-radio>
+                        <el-radio :label="10">失效</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="失效时间">
+                    <el-date-picker
+                            v-model="market.expires"
+                            type="datetime"
+                            placeholder="请选择失效时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="联系方式">
+                    <el-input v-model="market.qq" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="价格">
+                    <el-input v-model="market.price" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="原价">
+                    <el-input v-model="market.priceOld" auto-complete="off"></el-input>
                 </el-form-item>
 
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click.native="editCourseVisible = false">取消</el-button>
-                <el-button type="primary" @click.native="handleEditSubmit" :loading="addLoading">提交</el-button>
+                <el-button @click.native="marketFormVisible = false">取消</el-button>
+                <el-button type="primary" @click.native="handleMarketSubmit" :loading="addLoading">提交</el-button>
+            </div>
+        </el-dialog>
+
+
+        <!--  维护图片信息 -->
+        <el-dialog title="图片信息维护" :visible.sync="picForm" :close-on-click-modal="false">
+            <el-form :model="pics" label-width="130px" ref="pics">
+                <el-upload
+                        class="upload-demo"
+                        action="http://localhost:9527/services/file/file/upload"
+                        :before-remove="handleRemove"
+                        :on-success="handleSuccess"
+                        :file-list="fileList"
+                        limit="1"
+                        list-type="picture">
+                    <el-button size="small" type="primary">点击上传</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过1024kb</div>
+                </el-upload>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click.native="picForm = false">取消</el-button>
+                <el-button type="primary" @click.native="handlePicSubmit" :loading="addLoading">提交</el-button>
             </div>
         </el-dialog>
     </section>
@@ -202,18 +254,28 @@
         name: "course",
         data(){
             return {
+                //  图片信息维护
+                picForm:false,
+                pics:{
+                    courseId:'',
+                    resources:''
+                },
+                fileList:[],
+
                 // 富文本框内容
                 intro:'',
                 content:'',
+
                 //  市场信息维护
                 marketFormVisible:false,
                 market:{
-                    charge:'',
-                    valid:'',
+                    charge:5,
+                    valid:9,
+                    expires:'',
                     qq:'',
                     price:'',
-                    price_old:'',
-                    course_id:''
+                    priceOld:'',
+                    courseId:''
                 },
 
                 // 编辑所需
@@ -314,6 +376,8 @@
                 param.rows = this.pageSize;
                 param.keyword = this.filters.keyword;
                 param.status = this.filters.status;
+                param.typeId = sessionStorage.getItem("typeId");
+                sessionStorage.removeItem("typeId");
                 this.$http.post("/course/course/page",param)
                     .then(res=>{
                         let {total,rows} = res.data;
@@ -324,7 +388,10 @@
 
             // 处理新增课程
             handleAdd(){
+                this.$refs.addCourse.resetFields();
                 this.addCourseVisible = true;
+                this.description = '';
+                this.intro = '';
             },
             handleAddSubmit(){
                 let param = {};
@@ -341,8 +408,6 @@
                                 message : message
                             })
                             this.addCourseVisible = false;
-                            this.$refs.addCourse.resetFields()
-                            ;
                         }else{
                             this.$message({
                                 type : "error",
@@ -379,7 +444,7 @@
                                 message : message
                             })
                             this.editCourseVisible = false;
-                            this.editCourse.resetField();
+                            this.$refs.editCourse.resetFields();
                         }else{
                             this.$message({
                                 type : "error",
@@ -443,14 +508,98 @@
             },
 
             // 处理修改市场 信息
-            handleMarket(){
+            handleMarket(index,row){
                 this.marketFormVisible = true;
+                this.market.courseId = row.id;
+                this.$http.get("/course/courseMarket/"+this.market.courseId)
+                    .then(res=>{
+                        this.market = res.data;
+                    })
             },
+            handleMarketSubmit(){
+                let param = Object.assign({}, this.market);
+                param.expires = new Date(param.expires).getTime();
+                this.$http.post("/course/courseMarket/update",param)
+                    .then(res=>{
+                        let {success,message} = res.data;
+                        if (success){
+                            this.$message({
+                                message: message,
+                                type: 'success'
+                            });
+                            this.$refs.market.resetFields();
+                            this.marketFormVisible = false;
+                        }else{
+                            this.$message({
+                                message: message,
+                                type: 'error'
+                            });
+                        }
+                    })
+            },
+
 
             // 处理 资源图片信息
-            handlePic(){
-
+            handlePic(index,row){
+                this.picForm = true;
+                this.pics.courseId = row.id;
+                this.$http.post("/course/courseResource/list")
+                    .then(res=>{
+                        this.fileList = res.data;
+                    })
             },
+            handlePicSubmit(){
+                let param = Object.assign({}, this.pics);
+                this.$http.post("/course/courseResource/save",param)
+                    .then(res=>{
+                        let {success,message} = res.data;
+                        if (success){
+                            this.$message({
+                                message: message,
+                                type: 'success'
+                            });
+                            this.$refs.pics.resetFields();
+                            this.picForm = false;
+                        }else{
+                            this.$message({
+                                message: message,
+                                type: 'error'
+                            });
+                        }
+                    })
+            },
+
+            // 处理logo上传前的删除行为
+            handleRemove(file) {
+                this.file_id = file.response.resultObj;
+                setTimeout(()=>{
+                    this.$http.get("/file/file/delete?file_id="+this.file_id)
+                        .then(res=>{
+                            let{ success,message } = res.data;
+                            if(!success){
+                                this.$message({
+                                    message: message ,
+                                    type: 'error'
+                                });
+                                return false;
+                            }
+                        })
+                },500)
+            },
+            // 处理上传之后接收 返回数据
+            handleSuccess(response){
+                let{ success,message,resultObj } = response;
+                this.pics.resources = "http://172.16.5.137:22122/"+resultObj;
+                if(!success){
+                    this.$message({
+                        message: message ,
+                        type: 'error'
+                    });
+                }
+            },
+
+
+            // 处理翻页
             handleCurrentChange(val){
                 this.pageNum = val;
                 this.getCourses();
@@ -500,15 +649,21 @@
                         }
 
                     });
-            }
+            },
         },
         mounted(){
-            this.getCourses();
             this.getTreeData();
+            this.getCourses();
         }
     }
 </script>
 
 <style scoped>
+    #edit span{
+        display: none;
+    }
+    #edit:hover span{
+        display: initial;
+    }
 
 </style>

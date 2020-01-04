@@ -69,7 +69,7 @@ let routes = [
         path: '/',
         component: Home,
         name: '页面管理',
-        iconCls: 'fa fa-id-card-o',
+        iconCls: 'fa fa-modx',
         children: [
             { path: '/site', component: Site, name: '站点管理' },
             { path: '/page', component: Page, name: '页面管理' }
