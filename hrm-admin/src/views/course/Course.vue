@@ -36,8 +36,20 @@
 
         <!--列表-->
         <el-table :data="courses" highlight-current-row @selection-change="selsChange" style="width: 100%;">
-
             <el-table-column type="selection" width="55">
+            </el-table-column>
+
+            <el-table-column type="expand">
+                <template scope="scope">
+                    <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form-item label="课程简介">
+                            <span>{{ scope.row.courseDetail.intro }}</span>
+                        </el-form-item>
+                        <el-form-item label="课程详情">
+                            <span>{{ scope.row.courseDetail.description }}</span>
+                        </el-form-item>
+                    </el-form>
+                </template>
             </el-table-column>
             <el-table-column prop="name" label="名称" width="120" sortable>
             </el-table-column>
@@ -120,10 +132,7 @@
                 </el-form-item>
 
                 <el-form-item label="课程详情">
-                    <quill-editor v-model="content"
-                                  ref="myQuillEditor"
-                                  :options="editorOption"
-                                  @blur="onEditorBlur($event)">
+                    <quill-editor v-model="content">
                     </quill-editor>
                 </el-form-item>
 
@@ -168,10 +177,7 @@
                 </el-form-item>
 
                 <el-form-item label="课程详情">
-                    <quill-editor v-model="content"
-                                  ref="myQuillEditor"
-                                  :options="editorOption"
-                                  @blur="onEditorBlur($event)">
+                    <quill-editor v-model="content">
                     </quill-editor>
                 </el-form-item>
 
@@ -388,10 +394,17 @@
 
             // 处理新增课程
             handleAdd(){
-                this.$refs.addCourse.resetFields();
+                // this.$refs.addCourse.resetFields();
+
                 this.addCourseVisible = true;
                 this.description = '';
                 this.intro = '';
+                this.addCourse = {
+                    name:'',
+                    users:'',
+                    courseTypeId:'',
+                    grade:1
+                }
             },
             handleAddSubmit(){
                 let param = {};
@@ -421,11 +434,8 @@
             handleEdit(index,row){
                 this.editCourse = row;
                 this.valueId = row.courseTypeId;
-                this.$http.get("/course/courseDetail/"+row.id)
-                    .then(res=>{
-                        this.content = res.data.description;
-                        this.intro = res.data.intro;
-                    })
+                this.content = row.courseDetail.intro;
+                this.intro = row.courseDetail.intro;
                 this.editCourseVisible = true;
 
             },
@@ -659,11 +669,20 @@
 </script>
 
 <style scoped>
-    #edit span{
-        display: none;
+    .demo-table-expand {
+        font-size: 0;
     }
-    #edit:hover span{
-        display: initial;
+    .demo-table-expand label {
+        width: 90px;
+        color: #99a9bf;
     }
-
+    .el-form--label-left .el-form-item__label{
+        width: 90px !important;
+        color: #99a9bf;
+    }
+    .demo-table-expand .el-form-item {
+        margin-right: 0;
+        margin-bottom: 0;
+        width: 50%;
+    }
 </style>

@@ -93,7 +93,7 @@
                 <el-form-item label="别名">
                     <el-input v-model="addForm.alias" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="存储路径">
+                <el-form-item label="物理路径">
                     <el-input v-model="addForm.physicalPath" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="类型">
