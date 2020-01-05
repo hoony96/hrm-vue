@@ -4,9 +4,6 @@
             <el-col :span="5" style="border-right: 1px solid #DCDFE6; min-height:600px;">
                 <div class="tool-bar">
                     <span class="el-icon-info"> 单击右键,进行新增/修改/删除操作</span>
-                    <!--<el-button type="primary" class="el-icon-plus" circle></el-button>
-                    <el-button type="success" class="el-icon-edit" circle></el-button>
-                    <el-button type="info" class="el-icon-delete" circle></el-button>-->
                 </div>
                 <hr/>
                 <div class="grid-content bg-purple">

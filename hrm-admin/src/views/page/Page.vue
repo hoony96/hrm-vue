@@ -36,6 +36,7 @@
             <el-table-column label="操作" min-width="150">
                 <template scope="scope">
                     <el-button type="danger" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-button type="primary" @click="handleStatic(scope.$index, scope.row)">页面静态化</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -113,7 +114,19 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="模板地址">
-                    <el-input v-model="addForm.templateUrl" auto-complete="off"></el-input>
+                    <el-input v-model="addForm.templateUrl" size="mini" :readonly="true" auto-complete="off"></el-input>
+                    <el-upload
+                            class="upload-demo"
+                            action="http://localhost:9527/services/file/file/upload"
+                            :before-remove="handleRemove"
+                            :on-success="handleSuccess"
+                            :file-list="fileList">
+                        <el-button size="small" type="primary">点击上传</el-button>
+                        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过1024kb</div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="主模板名称">
+                    <el-input v-model="addForm.mainTemplateName" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -132,6 +145,9 @@
     export default {
         data() {
             return {
+                // 页面静态化
+                fileList:[],
+
                 // 站点
                 sites:[],
                 pages: [],
@@ -184,7 +200,8 @@
                     physicalPath:'',
                     type:'',
                     siteId:'',
-                    templateUrl:''
+                    templateUrl:'',
+                    mainTemplateName:''
                 }
 
             }
@@ -334,6 +351,47 @@
             },
             selsChange: function (sels) {
                 this.sels = sels;
+            },
+            // 处理模板上传前的删除行为
+            handleRemove(file) {
+                this.file_id = file.response.resultObj;
+                setTimeout(()=>{
+                    this.$http.get("/file/file/delete?file_id="+this.file_id)
+                        .then(res=>{
+                            let{ success,message } = res.data;
+                            if(!success){
+                                this.$message({
+                                    message: message ,
+                                    type: 'error'
+                                });
+                                return false;
+                            }
+                        })
+                },500)
+            },
+            // 处理上传之后接收 返回数据
+            handleSuccess(response){
+                let{ success,message,resultObj } = response;
+                this.addForm.templateUrl = resultObj;
+                if(!success){
+                    this.$message({
+                        message: message ,
+                        type: 'error'
+                    });
+                }
+            },
+            // 处理页面静态化
+            handleStatic(index,row){
+                this.$http.get("/course/courseType/static/"+row.id)
+                    .then((res)=>{
+                        let {success,message} = res.data;
+                        if(success){
+                            this.$message({
+                                message: message,
+                                type: 'success'
+                            });
+                        }
+                    })
             }
         },
         mounted() {
