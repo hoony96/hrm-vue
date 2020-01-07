@@ -36,7 +36,7 @@
             <el-table-column label="操作" min-width="150">
                 <template scope="scope">
                     <el-button type="danger" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                    <el-button type="primary" @click="handleStatic(scope.$index, scope.row)">页面静态化</el-button>
+                    <el-button type="primary" size="small" @click="handleStatic(scope.$index, scope.row)">页面静态化</el-button>
                 </template>
             </el-table-column>
         </el-table>

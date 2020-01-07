@@ -189,7 +189,6 @@
     methods: {
         // 处理logo上传前的删除行为
         handleRemove(file) {
-            this.file_id = file.response.resultObj;
             setTimeout(()=>{
                 this.$http.get("/file/file/delete?file_id="+this.file_id)
                     .then(res=>{

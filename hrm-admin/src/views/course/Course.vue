@@ -236,8 +236,8 @@
                         action="http://localhost:9527/services/file/file/upload"
                         :before-remove="handleRemove"
                         :on-success="handleSuccess"
+                        :on-remove="handleDelete"
                         :file-list="fileList"
-                        limit="1"
                         list-type="picture">
                     <el-button size="small" type="primary">点击上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过1024kb</div>
@@ -267,6 +267,9 @@
                     resources:''
                 },
                 fileList:[],
+                urls:[],
+                updateUrls:[],
+
 
                 // 富文本框内容
                 intro:'',
@@ -551,15 +554,33 @@
 
             // 处理 资源图片信息
             handlePic(index,row){
-                this.picForm = true;
+                this.fileList = [];
                 this.pics.courseId = row.id;
-                this.$http.post("/course/courseResource/list")
+                //  "http://172.16.5.22/group1/M00/00/02/rBAFFl4K4uWAbvrmAAA2x9-fIak952.jpg"
+                this.$http.get("/course/courseResource/"+row.id)
                     .then(res=>{
-                        this.fileList = res.data;
+                        let courseResources = res.data;   // 返回的是 一个对象
+                        if(courseResources.resources){
+                            let strs = courseResources.resources.split(",");
+                            if(strs.length > 0){
+                                this.updateUrls = strs;  // 用于上传修改时
+                                for(let i = 0;i<strs.length;i++){
+                                    let ress = {url:''};
+                                    ress.url = strs[i];
+                                    this.fileList.push(ress);
+                                }
+                            }
+                        }
                     })
+                setTimeout(()=>{
+                    this.picForm = true;
+                },700)
             },
             handlePicSubmit(){
+                this.pics.resources = this.updateUrls.join(",");
+                console.log(this.pics.resources);
                 let param = Object.assign({}, this.pics);
+                console.log(param)
                 this.$http.post("/course/courseResource/save",param)
                     .then(res=>{
                         let {success,message} = res.data;
@@ -569,6 +590,7 @@
                                 type: 'success'
                             });
                             this.$refs.pics.resetFields();
+                            this.fileList = [];
                             this.picForm = false;
                         }else{
                             this.$message({
@@ -579,11 +601,21 @@
                     })
             },
 
-            // 处理logo上传前的删除行为
-            handleRemove(file) {
-                this.file_id = file.response.resultObj;
+            // 处理删除行为
+            handleDelete(file,fileList){
+                // file 是删除的文件   fileList 是 剩下的文件
+                this.updateUrls = [];
+                for(let i=0;i<fileList.length;i++){
+                    this.updateUrls.push(fileList[i].url);
+                }
+            },
+
+            // 处理图片上传前的删除行为
+            handleRemove(file,fileList) {
+                let str = file.url;
+                str = str.substring(str.indexOf("g")-1,str.length);
                 setTimeout(()=>{
-                    this.$http.get("/file/file/delete?file_id="+this.file_id)
+                    this.$http.get("/file/file/delete?file_id="+str)
                         .then(res=>{
                             let{ success,message } = res.data;
                             if(!success){
@@ -594,12 +626,14 @@
                                 return false;
                             }
                         })
-                },500)
+                },300)
+
             },
             // 处理上传之后接收 返回数据
             handleSuccess(response){
                 let{ success,message,resultObj } = response;
-                this.pics.resources = "http://172.16.5.137:22122/"+resultObj;
+                this.urls.push("http://172.16.5.100"+resultObj);
+                this.updateUrls.push("http://172.16.5.100"+resultObj);
                 if(!success){
                     this.$message({
                         message: message ,
